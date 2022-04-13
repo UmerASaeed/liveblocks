@@ -41,6 +41,9 @@
   "dependencies": {
     "node-fetch": "^2.6.1"
   },
+  "peerDependencies": {
+    "encoding": "*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/liveblocks/liveblocks.git",
