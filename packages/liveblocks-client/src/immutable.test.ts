@@ -54,9 +54,10 @@ describe("patchLiveObjectKey", () => {
 describe("2 ways tests with two clients", () => {
   describe("Object/LiveObject", () => {
     test("create object", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncObj: { a: number };
-      }>([createSerializedObject("0:0", {})], 1);
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncObj: { a: number } }
+      >([createSerializedObject("0:0", {})], 1);
 
       expect(state).toEqual({});
 
@@ -75,9 +76,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("update object", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncObj: { a: number };
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncObj: { a: number } }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedObject("0:1", { a: 0 }, "0:0", "syncObj"),
@@ -102,9 +104,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("add nested object", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncObj: { a: any };
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncObj: { a: any } }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedObject("0:1", { a: 0 }, "0:0", "syncObj"),
@@ -129,9 +132,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("delete object key", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncObj: { a?: number };
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncObj: { a?: number } }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedObject("0:1", { a: 0 }, "0:0", "syncObj"),
@@ -158,9 +162,10 @@ describe("2 ways tests with two clients", () => {
 
   describe("Array/LiveList", () => {
     test("replace array of 3 elements to 1 element", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<number>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<number> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -186,9 +191,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("add item to array", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -211,9 +217,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("insert item at beginning of array", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -237,9 +244,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("swap items in array", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -266,9 +274,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("array of objects", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<LiveObject<{ a: number }>>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<LiveObject<{ a: number }>> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -292,9 +301,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("remove first item from array", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -319,9 +329,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("remove last item from array", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -346,9 +357,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("remove all elements of array except first", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -373,9 +385,10 @@ describe("2 ways tests with two clients", () => {
       assert({ syncList: ["a"] }, 3, 2);
     });
     test("remove all elements of array except last", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -400,9 +413,10 @@ describe("2 ways tests with two clients", () => {
       assert({ syncList: ["c"] }, 3, 2);
     });
     test("remove all elements of array", async () => {
-      const { storage, state, assert } = await prepareStorageImmutableTest<{
-        syncList: LiveList<string>;
-      }>(
+      const { storage, state, assert } = await prepareStorageImmutableTest<
+        never,
+        { syncList: LiveList<string> }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "syncList"),
@@ -444,9 +458,7 @@ describe("2 ways tests with two clients", () => {
 
     test("new state contains a function", async () => {
       const { storage, state, assertStorage } =
-        await prepareStorageImmutableTest<{
-          syncObj: { a: any };
-        }>(
+        await prepareStorageImmutableTest<never, { syncObj: { a: any } }>(
           [
             createSerializedObject("0:0", {}),
             createSerializedObject("0:1", { a: 0 }, "0:0", "syncObj"),
@@ -473,9 +485,10 @@ describe("2 ways tests with two clients", () => {
     });
 
     test("Production env - new state contains a function", async () => {
-      const { storage, state } = await prepareStorageImmutableTest<{
-        syncObj: { a: any };
-      }>(
+      const { storage, state } = await prepareStorageImmutableTest<
+        never,
+        { syncObj: { a: any } }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedObject("0:1", { a: 0 }, "0:0", "syncObj"),

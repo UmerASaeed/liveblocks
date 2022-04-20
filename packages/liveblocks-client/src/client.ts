@@ -1,5 +1,7 @@
 import { createRoom, InternalRoom } from "./room";
-import { ClientOptions, Room, Client, Presence, Authentication } from "./types";
+import { ClientOptions, Room, Client, Authentication } from "./types";
+import { JsonObject } from "./json";
+import { LsonObject } from "./lson";
 
 /**
  * Create a client that will be responsible to communicate with liveblocks servers.
@@ -30,29 +32,38 @@ export function createClient(options: ClientOptions): Client {
   const clientOptions = options;
   const throttleDelay = getThrottleDelayFromOptions(options);
 
-  const rooms = new Map<string, InternalRoom>();
+  const rooms = new Map<string, InternalRoom<JsonObject, LsonObject>>();
 
-  function getRoom(roomId: string): Room | null {
+  function getRoom<
+    TPresence extends JsonObject,
+    TStorageRoot extends LsonObject
+  >(roomId: string): Room<TPresence, TStorageRoot> | null {
     const internalRoom = rooms.get(roomId);
-    return internalRoom ? internalRoom.room : null;
+    return internalRoom
+      ? (internalRoom.room as unknown as Room<TPresence, TStorageRoot>)
+      : null;
   }
 
-  function enter<TStorageRoot>(
+  function enter<TPresence extends JsonObject, TStorageRoot extends LsonObject>(
     roomId: string,
     options: {
-      defaultPresence?: Presence;
+      defaultPresence?: TPresence;
       defaultStorageRoot?: TStorageRoot;
       /**
        * INTERNAL OPTION: Only used in a SSR context when you want an empty room to make sure your react tree is rendered properly without connecting to websocket
        */
       DO_NOT_USE_withoutConnecting?: boolean;
     } = {}
-  ): Room {
-    let internalRoom = rooms.get(roomId);
-    if (internalRoom) {
-      return internalRoom.room;
+  ): Room<TPresence, TStorageRoot> {
+    const existingInternalRoom = rooms.get(roomId);
+    if (existingInternalRoom) {
+      return existingInternalRoom.room as unknown as Room<
+        TPresence,
+        TStorageRoot
+      >;
     }
-    internalRoom = createRoom(
+
+    const newInternalRoom = createRoom<TPresence, TStorageRoot>(
       {
         defaultPresence: options.defaultPresence,
         defaultStorageRoot: options.defaultStorageRoot,
@@ -67,11 +78,14 @@ export function createClient(options: ClientOptions): Client {
         authentication: prepareAuthentication(clientOptions),
       }
     );
-    rooms.set(roomId, internalRoom);
+    rooms.set(
+      roomId,
+      newInternalRoom as unknown as InternalRoom<JsonObject, LsonObject>
+    );
     if (!options.DO_NOT_USE_withoutConnecting) {
-      internalRoom.connect();
+      newInternalRoom.connect();
     }
-    return internalRoom.room;
+    return newInternalRoom.room;
   }
 
   function leave(roomId: string) {

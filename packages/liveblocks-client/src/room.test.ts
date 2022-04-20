@@ -5,7 +5,6 @@ import {
   mockEffects,
   MockWebSocket,
   serverMessage,
-  objectToJson,
   createSerializedRegister,
   FIRST_POSITION,
   prepareIsolatedStorageTest,
@@ -13,6 +12,7 @@ import {
   waitFor,
   withDateNow,
 } from "../test/utils";
+import { lsonToJson } from "./immutable";
 import {
   ClientMessageType,
   CrdtType,
@@ -509,15 +509,19 @@ describe("room", () => {
 
   test("storage should be initialized properly", async () => {
     const effects = mockEffects();
-    const state = defaultState({});
-    const machine = makeStateMachine(state, defaultContext, effects);
+    const state = defaultState<never, { x: number }>();
+    const machine = makeStateMachine<never, { x: number }>(
+      state,
+      defaultContext,
+      effects
+    );
 
     const ws = new MockWebSocket("");
     machine.connect();
     machine.authenticationSuccess({ actor: 0 }, ws);
     ws.open();
 
-    const getStoragePromise = machine.getStorage<{ x: number }>();
+    const getStoragePromise = machine.getStorage();
 
     machine.onMessage(
       serverMessage({
@@ -555,7 +559,7 @@ describe("room", () => {
 
   test("if presence is not added to history during a batch, it should not impact the undo/stack", async () => {
     const effects = mockEffects();
-    const state = defaultState({});
+    const state = defaultState<{ x: number }, { x: number }>();
     const room = makeStateMachine(state, defaultContext, effects);
 
     const ws = new MockWebSocket("");
@@ -563,7 +567,7 @@ describe("room", () => {
     room.authenticationSuccess({ actor: 0 }, ws);
     ws.open();
 
-    const getStoragePromise = room.getStorage<{ x: number }>();
+    const getStoragePromise = room.getStorage();
 
     room.onMessage(
       serverMessage({
@@ -686,7 +690,7 @@ describe("room", () => {
 
   test("undo redo with presence + storage", async () => {
     const effects = mockEffects();
-    const state = defaultState({});
+    const state = defaultState<{ x: number }, { x: number }>();
     const room = makeStateMachine(state, defaultContext, effects);
 
     const ws = new MockWebSocket("");
@@ -694,7 +698,7 @@ describe("room", () => {
     room.authenticationSuccess({ actor: 0 }, ws);
     ws.open();
 
-    const getStoragePromise = room.getStorage<{ x: number }>();
+    const getStoragePromise = room.getStorage();
 
     room.onMessage(
       serverMessage({
@@ -725,15 +729,19 @@ describe("room", () => {
 
   test("batch without changes should not erase redo stack", async () => {
     const effects = mockEffects();
-    const state = defaultState({});
-    const room = makeStateMachine(state, defaultContext, effects);
+    const state = defaultState<never, { x: number }>();
+    const room = makeStateMachine<never, { x: number }>(
+      state,
+      defaultContext,
+      effects
+    );
 
     const ws = new MockWebSocket("");
     room.connect();
     room.authenticationSuccess({ actor: 0 }, ws);
     ws.open();
 
-    const getStoragePromise = room.getStorage<{ x: number }>();
+    const getStoragePromise = room.getStorage();
 
     room.onMessage(
       serverMessage({
@@ -778,14 +786,14 @@ describe("room", () => {
 
     test("batch storage and presence", async () => {
       const effects = mockEffects();
-      const state = defaultState({});
+      const state = defaultState<{ x: number }, { x: number }>();
       const machine = makeStateMachine(state, defaultContext, effects);
       const ws = new MockWebSocket("");
       machine.connect();
       machine.authenticationSuccess({ actor: 0 }, ws);
       ws.open();
 
-      const getStoragePromise = machine.getStorage<{ x: number }>();
+      const getStoragePromise = machine.getStorage();
 
       machine.onMessage(
         serverMessage({
@@ -817,9 +825,10 @@ describe("room", () => {
     });
 
     test("batch without operations should not add an item to the undo stack", async () => {
-      const { storage, assert, undo, batch } = await prepareStorageTest<{
-        a: number;
-      }>([createSerializedObject("0:0", { a: 1 })], 1);
+      const { storage, assert, undo, batch } = await prepareStorageTest<
+        never,
+        { a: number }
+      >([createSerializedObject("0:0", { a: 1 })], 1);
 
       storage.root.set("a", 2);
 
@@ -835,9 +844,7 @@ describe("room", () => {
 
     test("batch storage with changes from server", async () => {
       const { storage, assert, undo, redo, batch, subscribe, refSubscribe } =
-        await prepareStorageTest<{
-          items: LiveList<string>;
-        }>(
+        await prepareStorageTest<never, { items: LiveList<string> }>(
           [
             createSerializedObject("0:0", {}),
             createSerializedList("0:1", "0:0", "items"),
@@ -892,9 +899,7 @@ describe("room", () => {
         subscribe,
         refSubscribe,
         updatePresence,
-      } = await prepareStorageTest<{
-        items: LiveList<string>;
-      }>(
+      } = await prepareStorageTest<{ x: number }, { items: LiveList<string> }>(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "items"),
@@ -1047,9 +1052,7 @@ describe("room", () => {
   describe("offline", () => {
     test("disconnect and reconnect with offline changes", async () => {
       const { storage, assert, machine, refStorage, reconnect, ws } =
-        await prepareStorageTest<{
-          items: LiveList<string>;
-        }>(
+        await prepareStorageTest<never, { items: LiveList<string> }>(
           [
             createSerializedObject("0:0", {}),
             createSerializedList("0:1", "0:0", "items"),
@@ -1076,9 +1079,9 @@ describe("room", () => {
       // Operation done offline
       items.push("B");
 
-      const storageJson = objectToJson(storage.root);
+      const storageJson = lsonToJson(storage.root);
       expect(storageJson).toEqual({ items: ["A", "B"] });
-      const refStorageJson = objectToJson(refStorage.root);
+      const refStorageJson = lsonToJson(refStorage.root);
       expect(refStorageJson).toEqual({ items: ["A"] });
 
       const newInitStorage: SerializedCrdtWithId[] = [
@@ -1109,9 +1112,13 @@ describe("room", () => {
     });
 
     test("disconnect and reconnect with remote changes", async () => {
-      const { assert, machine } = await prepareIsolatedStorageTest<{
-        items: LiveList<string>;
-      }>(
+      const { assert, machine } = await prepareIsolatedStorageTest<
+        never,
+        {
+          items?: LiveList<string>;
+          items2?: LiveList<string>;
+        }
+      >(
         [
           createSerializedObject("0:0", {}),
           createSerializedList("0:1", "0:0", "items"),
@@ -1306,9 +1313,10 @@ describe("room", () => {
 
   describe("defaultStorage", () => {
     test("initialize room with defaultStorage should send operation only once", async () => {
-      const { assert, assertMessagesSent } = await prepareIsolatedStorageTest<{
-        items: LiveList<string>;
-      }>([createSerializedObject("0:0", {})], 1, { items: new LiveList() });
+      const { assert, assertMessagesSent } = await prepareIsolatedStorageTest<
+        Record<string, never>,
+        { items: LiveList<string> }
+      >([createSerializedObject("0:0", {})], 1, { items: new LiveList() });
 
       assert({
         items: [],

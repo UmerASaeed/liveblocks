@@ -1,8 +1,7 @@
 import { Json, JsonObject } from "./json";
-import { Presence } from "./types";
 
-export type ServerMessage =
-  | UpdatePresenceMessage
+export type ServerMessage<TPresence extends JsonObject> =
+  | UpdatePresenceMessage<TPresence>
   | UserJoinMessage
   | UserLeftMessage
   | EventMessage
@@ -31,10 +30,10 @@ export type RoomStateMessage = {
   };
 };
 
-export type UpdatePresenceMessage = {
+export type UpdatePresenceMessage<TPresence extends JsonObject> = {
   type: ServerMessageType.UpdatePresence;
   actor: number;
-  data: Presence;
+  data: TPresence;
   targetActor?: number;
 };
 
@@ -68,9 +67,9 @@ export type UpdateStorageMessage = {
   ops: Op[];
 };
 
-export type ClientMessage =
+export type ClientMessage<TPresence extends JsonObject> =
   | ClientEventMessage
-  | UpdatePresenceClientMessage
+  | UpdatePresenceClientMessage<TPresence>
   | UpdateStorageClientMessage
   | FetchStorageClientMessage;
 
@@ -87,9 +86,9 @@ export type ClientEventMessage = {
   event: Json;
 };
 
-export type UpdatePresenceClientMessage = {
+export type UpdatePresenceClientMessage<TPresence extends JsonObject> = {
   type: ClientMessageType.UpdatePresence;
-  data: Presence;
+  data: TPresence;
   targetActor?: number;
 };
 

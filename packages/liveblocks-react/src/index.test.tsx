@@ -9,13 +9,16 @@ import {
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 import { createClient } from "@liveblocks/client";
-import {
-  LiveblocksProvider,
-  RoomProvider,
-  useMyPresence,
-  useObject,
-  useOthers,
-} from ".";
+import { LiveblocksProvider, createHooks } from ".";
+
+// Liveblocks customers provide these "payload" types
+type Presence = { x: number };
+type Storage = { obj: string };
+
+const { RoomProvider, useMyPresence, useObject, useOthers } = createHooks<
+  Presence,
+  Storage
+>();
 
 // TODO: find out why typescript is complaining when using @liveblocks/client/internal even if properly defined in package.json
 import {
@@ -117,7 +120,7 @@ const testIds = {
 };
 
 function PresenceComponent() {
-  const [me, setPresence] = useMyPresence<{ x: number }>();
+  const [me, setPresence] = useMyPresence();
   const others = useOthers();
 
   return (
