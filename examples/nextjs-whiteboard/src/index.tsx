@@ -15,7 +15,6 @@ import {
   LayerType,
   CanvasState,
   CanvasMode,
-  Presence,
   Camera,
   Side,
   XYWH,
@@ -81,7 +80,7 @@ function Canvas({
   layerIds: LiveList<string>;
   layers: LiveMap<string, LiveObject<Layer>>;
 }) {
-  const [{ selection, pencilDraft }, setPresence] = useMyPresence<Presence>();
+  const [{ selection, pencilDraft }, setPresence] = useMyPresence();
   const [canvasState, setState] = useState<CanvasState>({
     mode: CanvasMode.None,
   });
@@ -429,7 +428,7 @@ function Canvas({
 
   // TODO: Expose a hook to observe only one key of the others presence to improve performance
   // For example, multiplayer selection should not be re-render if only a cursor move
-  const others = useOthers<Presence>();
+  const others = useOthers();
 
   /**
    * Create a map layerId to color based on the selection of all the users in the room
