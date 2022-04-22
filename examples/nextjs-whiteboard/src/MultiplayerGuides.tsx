@@ -1,4 +1,4 @@
-import { useOthers } from "@liveblocks/react";
+import { useOthers } from "./liveblocks";
 import React from "react";
 import { colorToCss, connectionIdToColor } from "./utils";
 import { Presence } from "./types";

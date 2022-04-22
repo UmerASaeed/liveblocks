@@ -6,7 +6,7 @@ import {
   useMap,
   useHistory,
   useBatch,
-} from "@liveblocks/react";
+} from "./liveblocks";
 import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
