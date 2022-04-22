@@ -49,7 +49,8 @@ export default function Room() {
       id={"multiplayer-canvas"}
       defaultPresence={() => ({
         selection: [],
-        penPoints: null,
+        cursor: null,
+        pencilDraft: null,
         penColor: null,
       })}
     >
