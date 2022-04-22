@@ -13,7 +13,7 @@ import { LiveblocksProvider, createHooks } from ".";
 
 // Liveblocks customers provide these "payload" types
 type Presence = { x: number };
-type Storage = { obj: string };
+type Storage = { obj: { a: number } };
 
 const { RoomProvider, useMyPresence, useObject, useOthers } = createHooks<
   Presence,
@@ -421,7 +421,6 @@ describe("presence", () => {
 
 function ObjectComponent() {
   const obj = useObject("obj", { a: 0 });
-
   return (
     <div data-testid={testIds.liveObject}>
       {obj == null ? "Loading" : JSON.stringify(obj.toObject())}

@@ -16,7 +16,24 @@ import {
 } from "@liveblocks/client";
 import useRerender from "./useRerender";
 
-type LiveStructure = Exclude<Lson, Json>;
+// TODO: Properly name and document this helper type, and probably put this in
+// @liveblocks/client instead!
+
+// prettier-ignore
+type Peel<L extends Lson> =
+  L extends Json ? L :
+  L extends LiveMap<infer K, infer V> ? [K, V][] :
+  L extends LiveObject<infer O> ? O :
+  L extends LiveList<infer I> ? I[] :
+  never;
+
+// prettier-ignore
+type Wrap<L extends Lson> =
+  L extends | LiveMap<any, any> | LiveObject<any> | LiveList<any> ? L :
+  L extends [string, Lson][] ? LiveMap<L[number][0], L[number][1]> :
+  L extends Lson[] ? LiveList<L[number]> :
+  L extends { [key: string]: Lson } ? LiveObject<L> :
+  never;
 
 export type RoomProviderProps<
   TPresence extends JsonObject,
@@ -354,11 +371,11 @@ export function createHooks<
    * const emptyMap = useMap("mapA");
    * const mapWithItems = useMap("mapB", [["keyA", "valueA"], ["keyB", "valueB"]]);
    */
-  function useMap<TKey extends string, TValue extends Lson>(
-    key: string,
-    entries?: readonly (readonly [TKey, TValue])[] | null | undefined
-  ): LiveMap<TKey, TValue> | null {
-    return useCrdt(key, new LiveMap(entries));
+  function useMap<K extends keyof TStorageRoot>(
+    key: K,
+    entries?: Peel<TStorageRoot[K]>
+  ): Wrap<TStorageRoot[K]> | null {
+    return useCrdt(key, new LiveMap(entries as any) as any);
   }
 
   /**
@@ -373,11 +390,11 @@ export function createHooks<
    * const emptyList = useList("listA");
    * const listWithItems = useList("listB", ["a", "b", "c"]);
    */
-  function useList<TValue extends Lson>(
-    key: string,
-    items?: TValue[] | undefined
-  ): LiveList<TValue> | null {
-    return useCrdt<LiveList<TValue>>(key, new LiveList(items));
+  function useList<K extends keyof TStorageRoot>(
+    key: K,
+    items?: Peel<TStorageRoot[K]>
+  ): Wrap<TStorageRoot[K]> | null {
+    return useCrdt(key, new LiveList(items as any) as any);
   }
 
   /**
@@ -394,11 +411,11 @@ export function createHooks<
    *   website: "https://liveblocks.io"
    * });
    */
-  function useObject<TData extends LsonObject>(
-    key: string,
-    initialData?: TData
-  ): LiveObject<TData> | null {
-    return useCrdt(key, new LiveObject(initialData));
+  function useObject<K extends keyof TStorageRoot>(
+    key: K,
+    initialData?: Peel<TStorageRoot[K]>
+  ): Wrap<TStorageRoot[K]> | null {
+    return useCrdt(key, new LiveObject(initialData as any) as any);
   }
 
   /**
@@ -434,11 +451,10 @@ export function createHooks<
     return useRoom().history;
   }
 
-  function useCrdt<T extends LiveStructure>(
-    key: string,
-    //   ^^^^^^ FIXME... can now be `keyof TStorageRoot` I think!
-    initialCrdt: T
-  ): T | null {
+  function useCrdt<K extends keyof TStorageRoot>(
+    key: K,
+    initialCrdt: TStorageRoot[K]
+  ): Wrap<TStorageRoot[K]> | null {
     const room = useRoom();
     const [root] = useStorage();
     const rerender = useRerender();
@@ -448,23 +464,18 @@ export function createHooks<
         return;
       }
 
-      let crdt: T | null = root.get(key) as T | null;
-      //                                 ^^^^^^^^^^^ FIXME
+      let crdt: TStorageRoot[K] | null = root.get(key);
 
       if (crdt == null) {
-        crdt = initialCrdt as T;
-        //                 ^^^^ FIXME
-        root.set(key, crdt as any);
-        //                 ^^^^^^ FIXME
+        crdt = initialCrdt;
+        root.set(key, crdt);
       }
 
       function onRootChange() {
-        const newCrdt = root!.get(key) as LiveStructure;
-        //                             ^^^^^^^^^^^^^^^^ FIXME
+        const newCrdt = root!.get(key);
         if (newCrdt !== crdt) {
           unsubscribeCrdt();
-          crdt = newCrdt as T;
-          //             ^^^^ FIXME
+          crdt = newCrdt;
           unsubscribeCrdt = room.subscribe(
             crdt as any /* AbstractCrdt */,
             rerender
@@ -490,8 +501,7 @@ export function createHooks<
       };
     }, [root, room]);
 
-    return (root?.get(key) as T | undefined) ?? null;
-    //                     ^^^^^^^^^^^^^^^^ FIXME
+    return (root?.get(key) as Wrap<TStorageRoot[K]>) ?? null;
   }
 
   return {
