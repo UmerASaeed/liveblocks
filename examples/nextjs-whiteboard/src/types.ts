@@ -1,3 +1,5 @@
+import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
+
 export type Color = {
   r: number;
   g: number;
@@ -133,3 +135,8 @@ export enum CanvasMode {
    */
   Pencil,
 }
+
+export type Storage = {
+  layerIds: LiveList<string>;
+  layers: LiveMap<string, LiveObject<Layer>>;
+};
