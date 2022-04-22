@@ -35,6 +35,16 @@ type Wrap<L extends Lson> =
   L extends { [key: string]: Lson } ? LiveObject<L> :
   never;
 
+type KeysThatAre<O extends LsonObject, T> = keyof {
+  [K in keyof O]: [O[K]] extends [T] ? true : never;
+};
+
+// type KeysThatAreLiveObjects<O extends LsonObject> = KeysThatAre<
+//   O,
+//   LiveObject<any>
+// >;
+// keyof { [K in keyof O]: O[K] extends LiveObject<any> ? true : never; };
+
 export type RoomProviderProps<
   TPresence extends JsonObject,
   TStorageRoot extends LsonObject
@@ -371,7 +381,7 @@ export function createHooks<
    * const emptyMap = useMap("mapA");
    * const mapWithItems = useMap("mapB", [["keyA", "valueA"], ["keyB", "valueB"]]);
    */
-  function useMap<K extends keyof TStorageRoot>(
+  function useMap<K extends KeysThatAre<TStorageRoot, LiveMap<any, any>>>(
     key: K,
     entries?: Peel<TStorageRoot[K]>
   ): Wrap<TStorageRoot[K]> | null {
@@ -390,7 +400,7 @@ export function createHooks<
    * const emptyList = useList("listA");
    * const listWithItems = useList("listB", ["a", "b", "c"]);
    */
-  function useList<K extends keyof TStorageRoot>(
+  function useList<K extends KeysThatAre<TStorageRoot, LiveList<any>>>(
     key: K,
     items?: Peel<TStorageRoot[K]>
   ): Wrap<TStorageRoot[K]> | null {
@@ -411,7 +421,7 @@ export function createHooks<
    *   website: "https://liveblocks.io"
    * });
    */
-  function useObject<K extends keyof TStorageRoot>(
+  function useObject<K extends KeysThatAre<TStorageRoot, LiveObject<any>>>(
     key: K,
     initialData?: Peel<TStorageRoot[K]>
   ): Wrap<TStorageRoot[K]> | null {

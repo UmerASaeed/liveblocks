@@ -63,9 +63,10 @@ export default function Room() {
 
 function WhiteboardTool() {
   // layers is a LiveMap that contains all the shapes drawn on the canvas
-  const layers = useMap<string, LiveObject<Layer>>("layers");
+  const layers = useMap("layers");
+  const xxx = useList("layers");
   // layerIds is LiveList of all the layer ids ordered by their z-index
-  const layerIds = useList<string>("layerIds");
+  const layerIds = useList("layerIds");
 
   if (layerIds == null || layers == null) {
     return <LoadingIndicator />;
