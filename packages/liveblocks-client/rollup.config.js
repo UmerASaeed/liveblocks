@@ -186,7 +186,10 @@ export default async () => {
   const external = [
     ...Object.keys(pkgJson?.dependencies ?? {}),
     ...Object.keys(pkgJson?.peerDependencies ?? {}),
-  ];
+  ].flatMap((dep) =>
+    // Also include `.../internal` as an external reference, by convention
+    [dep, dep + "/internal"]
+  );
 
   return [
     // Build modern ES modules (*.mjs)
