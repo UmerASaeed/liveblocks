@@ -12,7 +12,6 @@ import type {
   LsonObject,
   Op,
   ParentToChildNodeMap,
-  SerializedCrdt,
   SerializedObject,
   SerializedRootObject,
   ToJson,
@@ -286,7 +285,7 @@ export class LiveObject<O extends LsonObject> extends AbstractCrdt {
   /**
    * @internal
    */
-  _toSerializedCrdt(): SerializedCrdt {
+  _toSerializedCrdt(): SerializedObject | SerializedRootObject {
     const data: Record<string, any> = {};
 
     for (const [key, value] of this._map) {
