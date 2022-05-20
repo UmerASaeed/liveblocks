@@ -60,12 +60,11 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
       return list;
     }
 
-    for (const entry of children) {
-      const child = deserialize(entry, parentToChildren, doc);
+    for (const [id, crdt] of children) {
+      const child = deserialize([id, crdt], parentToChildren, doc);
 
-      child._setParentLink(list, entry[1].parentKey!);
-
-      list._items.push([child, entry[1].parentKey!]);
+      child._setParentLink(list, crdt.parentKey);
+      list._items.push([child, crdt.parentKey]);
       list._items.sort((itemA, itemB) => compare(itemA[1], itemB[1]));
     }
 
