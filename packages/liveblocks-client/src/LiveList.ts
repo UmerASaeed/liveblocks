@@ -76,19 +76,13 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
    * @internal
    */
   _serialize(
-    parentId?: string,
-    parentKey?: string,
+    parentId: string,
+    parentKey: string,
     doc?: Doc,
     intent?: "set"
   ): Op[] {
     if (this._id == null) {
       throw new Error("Cannot serialize item is not attached");
-    }
-
-    if (parentId == null || parentKey == null) {
-      throw new Error(
-        "Cannot serialize list if parentId or parentKey is undefined"
-      );
     }
 
     const ops = [];
