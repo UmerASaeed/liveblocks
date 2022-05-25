@@ -153,44 +153,6 @@ export abstract class AbstractCrdt {
   /**
    * @internal
    */
-  get _parentNode(): LiveNode | null {
-    switch (this.parent.type) {
-      case "HasParent":
-        return this.parent.node;
-
-      case "NoParent":
-        return null;
-
-      case "Orphaned":
-        return null;
-
-      default:
-        return assertNever(this.parent, "Unknown state");
-    }
-  }
-
-  /**
-   * @internal
-   */
-  get _parentKey(): string | null {
-    switch (this.parent.type) {
-      case "HasParent":
-        return this.parent.key;
-
-      case "NoParent":
-        return null;
-
-      case "Orphaned":
-        return this.parent.oldKey;
-
-      default:
-        return assertNever(this.parent, "Unknown state");
-    }
-  }
-
-  /**
-   * @internal
-   */
   _apply(op: Op, _isLocal: boolean): ApplyResult {
     switch (op.type) {
       case OpCode.DELETE_CRDT: {
