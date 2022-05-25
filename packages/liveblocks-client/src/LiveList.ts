@@ -231,7 +231,13 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
     // If item already exists...
     if (existingItem != null) {
       // ...and if it's at the right position
-      if (existingItem._parentKey === op.parentKey) {
+      if (
+        (existingItem.parent.type === "HasParent" &&
+          existingItem.parent.key === op.parentKey) ||
+        // XXX Double-check! Is the use of Orphaned state intentional here?
+        (existingItem.parent.type === "Orphaned" &&
+          existingItem.parent.oldKey === op.parentKey)
+      ) {
         // ... do nothing
         if (delta.length > 0) {
           return {
@@ -374,7 +380,13 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
     const itemIndexAtPosition = this._indexOfPosition(key);
 
     if (existingItem) {
-      if (existingItem._parentKey === key) {
+      if (
+        (existingItem.parent.type === "HasParent" &&
+          existingItem.parent.key === key) ||
+        // XXX Double-check! Is the use of Orphaned state intentional here?
+        (existingItem.parent.type === "Orphaned" &&
+          existingItem.parent.oldKey === key)
+      ) {
         // Normal case, no modification
         return {
           modified: false,
@@ -570,7 +582,16 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
     child: LiveNode
   ): { reverse: Op[]; modified: LiveListUpdates<TItem> } | { modified: false } {
     if (child) {
-      const parentKey = nn(child._parentKey);
+      if (child.parent.type === "NoParent") {
+        throw new Error("Expected child to have a parent");
+      }
+
+      const parentKey =
+        child.parent.type === "HasParent"
+          ? child.parent.key
+          : // XXX Double-check! Is the use of Orphaned state intentional here?
+            child.parent.oldKey;
+
       const reverse = child._serialize(nn(this._id), parentKey, this._doc);
 
       const indexToDelete = this._items.indexOf(child);
@@ -612,7 +633,13 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
       };
     }
 
-    const previousKey = child._parentKey;
+    const previousKey =
+      child.parent.type === "HasParent"
+        ? child.parent.key
+        : // XXX Double-check! Is the use of Orphaned state intentional here?
+        child.parent.type === "Orphaned"
+        ? child.parent.oldKey
+        : null;
 
     if (newKey === previousKey) {
       return {
@@ -671,7 +698,15 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
    * @internal
    */
   private _applySetChildKeyAck(newKey: string, child: LiveNode): ApplyResult {
-    const previousKey = nn(child._parentKey);
+    if (child.parent.type === "NoParent") {
+      throw new Error("Expected child to have a parent");
+    }
+
+    const previousKey =
+      child.parent.type === "HasParent"
+        ? child.parent.key
+        : // XXX Double-check! Is the use of Orphaned state intentional here?
+          child.parent.oldKey;
 
     if (this._implicitlyDeletedItems.has(child)) {
       const existingItemIndex = this._indexOfPosition(newKey);
@@ -748,7 +783,15 @@ export class LiveList<TItem extends Lson> extends AbstractCrdt {
     newKey: string,
     child: LiveNode
   ): ApplyResult {
-    const previousKey = nn(child._parentKey);
+    if (child.parent.type === "NoParent") {
+      throw new Error("Expected child to have a parent");
+    }
+
+    const previousKey =
+      child.parent.type === "HasParent"
+        ? child.parent.key
+        : // XXX Double-check! Is the use of Orphaned state intentional here?
+          child.parent.oldKey;
 
     const previousIndex = this._items.indexOf(child);
     const existingItemIndex = this._indexOfPosition(newKey);

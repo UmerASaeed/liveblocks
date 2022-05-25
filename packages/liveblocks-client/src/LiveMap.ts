@@ -182,8 +182,17 @@ export class LiveMap<
    * @internal
    */
   _detachChild(child: LiveNode): ApplyResult {
+    if (child.parent.type === "NoParent") {
+      throw new Error("Expected child to have a parent");
+    }
+
+    const parentKey =
+      child.parent.type === "HasParent"
+        ? child.parent.key
+        : // XXX Double-check! Is the use of Orphaned state intentional here?
+          child.parent.oldKey;
+
     const id = nn(this._id);
-    const parentKey = nn(child._parentKey);
     const reverse = child._serialize(id, parentKey, this._doc);
 
     for (const [key, value] of this._map) {
