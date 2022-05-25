@@ -109,25 +109,6 @@ export abstract class AbstractCrdt {
   /**
    * @internal
    */
-  _getParentKeyOrThrow(): string {
-    switch (this.parent.type) {
-      case "HasParent":
-        return this.parent.key;
-
-      case "NoParent":
-        throw new Error("Parent key is missing");
-
-      case "Orphaned":
-        return this.parent.oldKey;
-
-      default:
-        return assertNever(this.parent, "Unknown state");
-    }
-  }
-
-  /**
-   * @internal
-   */
   protected get _doc(): Doc | undefined {
     return this.__doc;
   }
