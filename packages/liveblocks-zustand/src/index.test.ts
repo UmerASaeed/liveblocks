@@ -1,4 +1,4 @@
-import type { JsonObject, Presence } from "@liveblocks/client";
+import type { JsonObject } from "@liveblocks/client";
 import { createClient } from "@liveblocks/client";
 import type {
   IdTuple,
@@ -99,7 +99,7 @@ const basicStateCreator: StateCreator<BasicStore> = (set) => ({
 
 function prepareClientAndStore<
   T extends ZustandState,
-  TPresence extends Presence = Presence
+  TPresence extends JsonObject = JsonObject
 >(
   stateCreator: StateCreator<T>,
   options: {
